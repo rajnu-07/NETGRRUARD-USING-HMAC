@@ -162,7 +162,7 @@ step2Form.addEventListener('submit', (e) => {
 
     // Simulate verification delay, then redirect
     setTimeout(() => {
-      window.location.href = 'index.html';
+      window.location.href = 'dashboard.html';
     }, 1000);
   } else {
     otpError.textContent = 'Invalid OTPs. Please check again.';

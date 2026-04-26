@@ -1,628 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NetGuard — Network Monitoring & Threat Mitigation</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetGuard — Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
-<body>
+<body class="login-body">
 
-<div class="shell">
-<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
-<aside class="sidebar">
-  <div class="brand">
-    <div class="brand-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="brand" style="justify-content: center; margin-bottom: 24px;">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="brand-name">NetGuard</div>
     </div>
-    <div class="brand-name">NetGuard</div>
-    <div class="brand-sub">v1.0.0 · HMAC-SHA512</div>
+    
+    <div class="login-header">
+      <h2 id="form-title">Admin Access</h2>
+      <p id="form-subtitle" class="layer-desc">Secure gateway to network controls</p>
+    </div>
+
+    <!-- Step 1: Credentials Form -->
+    <form id="step-1-form" class="login-form">
+      <div class="input-group">
+        <label for="admin-user">Username</label>
+        <input type="text" id="admin-user" placeholder="Enter admin username" required>
+      </div>
+      <div class="input-group">
+        <label for="admin-pass">Password</label>
+        <input type="password" id="admin-pass" placeholder="Enter admin password" required>
+      </div>
+      <!-- Inputs for targets -->
+      <div class="input-group">
+        <label for="admin-email">Recovery Email</label>
+        <input type="email" id="admin-email" placeholder="Email to receive OTP" required>
+      </div>
+      <div class="input-group">
+        <label for="admin-phone">Phone Number</label>
+        <input type="tel" id="admin-phone" placeholder="Include country code (+123...)" required>
+      </div>
+      <button type="submit" class="btn btn-primary login-btn" id="btn-auth">
+        <span>Authenticate</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <div id="login-error" class="error-text"></div>
+    </form>
+
+    <!-- Step 2: OTP Form -->
+    <form id="step-2-form" class="login-form" style="display: none;">
+      <div class="alert-box" id="otp-alert">
+        OTP sent! Check your Email and Phone.
+      </div>
+      <div class="input-group">
+        <label for="email-otp">Email OTP</label>
+        <input type="text" id="email-otp" placeholder="Enter 6-digit Email OTP" maxlength="6" required>
+      </div>
+      <div class="input-group">
+        <label for="sms-otp">SMS OTP</label>
+        <input type="text" id="sms-otp" placeholder="Enter 6-digit SMS OTP" maxlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary login-btn" id="btn-verify">
+        <span>Verify & Login</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </button>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button type="button" class="btn btn-ghost login-btn" style="flex: 1; justify-content: center;" onclick="resendOtps()">
+          <span>Resend OTPs</span>
+        </button>
+        <button type="button" class="btn btn-ghost login-btn" style="flex: 1; justify-content: center;" onclick="resetForm()">
+          <span>Back</span>
+        </button>
+      </div>
+      <div id="otp-error" class="error-text"></div>
+    </form>
+
   </div>
+</div>
 
-  <nav class="nav">
-    <div class="nav-section">Overview</div>
-    <div class="nav-item active" onclick="nav('overview',this)">
-      <div class="dot"></div><span class="layer-num">—</span>Dashboard
-    </div>
-
-    <div class="nav-section" style="margin-top:8px">Layers</div>
-    <div class="nav-item" onclick="nav('layer1',this)">
-      <div class="dot"></div><span class="layer-num">L1</span>Nginx Web Server
-    </div>
-    <div class="nav-item" onclick="nav('layer2',this)">
-      <div class="dot"></div><span class="layer-num">L2</span>Request Logger
-    </div>
-    <div class="nav-item" onclick="nav('layer3',this)">
-      <div class="dot"></div><span class="layer-num">L3</span>Threat Detection
-    </div>
-    <div class="nav-item" onclick="nav('layer4',this)">
-      <div class="dot"></div><span class="layer-num">L4</span>HMAC-SHA512 Signer
-    </div>
-    <div class="nav-item" onclick="nav('layer5',this)">
-      <div class="dot"></div><span class="layer-num">L5</span>Firewall Controller
-    </div>
-    <div class="nav-item" onclick="nav('layer6',this)">
-      <div class="dot"></div><span class="layer-num">L6</span>Security Monitor
-    </div>
-
-    <div class="nav-section" style="margin-top:8px">Tools</div>
-    <div class="nav-item" onclick="nav('hmac-lab',this)">
-      <div class="dot"></div><span class="layer-num">⚗</span>HMAC Lab
-    </div>
-    <div class="nav-item" onclick="nav('attack-sim',this)">
-      <div class="dot"></div><span class="layer-num">⚡</span>Attack Simulator
-    </div>
-  </nav>
-
-  <div class="sidebar-status">
-    <div class="status-row"><div class="status-dot green"></div><span style="color:var(--text2);font-family:var(--mono);font-size:11px;">Nginx · running</span></div>
-    <div class="status-row"><div class="status-dot green"></div><span style="color:var(--text2);font-family:var(--mono);font-size:11px;">Redis · connected</span></div>
-    <div class="status-row"><div class="status-dot amber"></div><span style="color:var(--text2);font-family:var(--mono);font-size:11px;">Threat level · LOW</span></div>
-  </div>
-</aside>
-
-<!-- ═══════════════════ MAIN ═══════════════════ -->
-<main class="main">
-  <div class="topbar">
-    <div>
-      <div class="page-title" id="page-title">Dashboard Overview</div>
-      <div class="page-sub" id="page-sub">Network Monitoring & Threat Mitigation · HMAC-SHA512</div>
-    </div>
-    <div class="topbar-right">
-      <div class="live-badge"><div class="status-dot green" style="width:6px;height:6px"></div>LIVE</div>
-      <div class="threat-level low" id="threat-badge">THREAT: LOW</div>
-      <div class="clock" id="clock">--:--:--</div>
-    </div>
-  </div>
-
-  <div class="content">
-
-  <!-- ══════════ ALERT TICKER ══════════ -->
-  <div class="alert-ticker" id="alert-ticker">
-    <div class="ticker-inner">
-      <div class="ticker-label">ALERT</div>
-      <div class="ticker-text" id="ticker-text">Security event detected</div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: OVERVIEW ══════════ -->
-  <div class="page active" id="page-overview">
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">TOTAL REQUESTS</div>
-        <div class="stat-value blue" id="s-total">0</div>
-        <div class="stat-change" id="s-total-c">↑ loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">BLOCKED IPs</div>
-        <div class="stat-value red" id="s-blocked">0</div>
-        <div class="stat-change" id="s-blocked-c">iptables rules active</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">THREATS DETECTED</div>
-        <div class="stat-value amber" id="s-threats">0</div>
-        <div class="stat-change" id="s-threats-c">last 60 seconds</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">HMAC VERIFIED</div>
-        <div class="stat-value green" id="s-hmac">100%</div>
-        <div class="stat-change">command integrity</div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Live Traffic</div>
-          <span class="badge green">real-time</span>
-        </div>
-        <div class="panel-body">
-          <div class="chart-wrap"><canvas id="traffic-chart"></canvas></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Top IPs by Request Volume</div>
-          <span class="badge amber">redis counters</span>
-        </div>
-        <div class="panel-body" id="ip-bars" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Live Request Log</div>
-          <span class="badge blue">sqlite</span>
-        </div>
-        <div class="panel-body" style="padding:0">
-          <div class="terminal" id="request-log" style="border:none;border-radius:0 0 10px 10px;max-height:220px"></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Security Events</div>
-          <span class="badge red">alerts</span>
-        </div>
-        <div class="panel-body" style="padding:0">
-          <div class="terminal" id="security-log" style="border:none;border-radius:0 0 10px 10px;max-height:220px"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Active Firewall Rules</div>
-        <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="clearAllBlocks()">Clear all</button>
-      </div>
-      <div class="panel-body" style="padding:0">
-        <table class="data-table">
-          <thead><tr><th>#</th><th>Blocked IP</th><th>Reason</th><th>Duration</th><th>Time left</th><th>Action</th></tr></thead>
-          <tbody id="firewall-table"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No active blocks</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 1 ══════════ -->
-  <div class="page" id="page-layer1">
-    <div class="layer-hero">
-      <div class="layer-num-big">L1</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">Nginx Web Server</div>
-        <div class="layer-desc">Front door of the system · TLS termination · IP blocklist · rate limiting · reverse proxy to Flask</div>
-      </div>
-    </div>
-
-    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
-      <div class="stat-card"><div class="stat-label">CONNECTIONS/SEC</div><div class="stat-value blue" id="nginx-rps">0</div></div>
-      <div class="stat-card"><div class="stat-label">BLOCKED AT GATE</div><div class="stat-value red" id="nginx-blocked">0</div></div>
-      <div class="stat-card"><div class="stat-label">RATE LIMITED</div><div class="stat-value amber" id="nginx-rl">0</div></div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Nginx Pipeline</div></div>
-        <div class="panel-body">
-          <div style="display:flex;flex-direction:column;gap:10px" id="nginx-pipeline">
-            <div class="rule-card" id="n-tls"><div class="rule-icon" style="background:var(--blue-dim);color:var(--blue)">🔒</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">TLS Termination</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">HTTPS → HTTP (localhost)</div></div></div>
-            <div class="rule-card" id="n-ip"><div class="rule-icon" style="background:var(--red-dim);color:var(--red)">🚫</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">IP Blocklist Check</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">deny rules from blocked_ips.conf</div></div></div>
-            <div class="rule-card" id="n-rate"><div class="rule-icon" style="background:var(--amber-dim);color:var(--amber)">⚡</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Rate Limiter (10 req/s)</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">leaky bucket · burst=20 · 429 on overflow</div></div></div>
-            <div class="rule-card" id="n-proxy"><div class="rule-icon" style="background:var(--green-dim);color:var(--green)">→</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Reverse Proxy</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">proxy_pass http://127.0.0.1:5000</div></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">nginx.conf</div></div>
-        <div class="panel-body" style="padding:0">
-          <div class="code-block" style="border:none;border-radius:0 0 10px 10px;max-height:320px">
-<span class="c-cmt"># Rate limit zone — 10 req/sec per IP</span>
-<span class="c-kw">limit_req_zone</span> <span class="c-var">$binary_remote_addr</span>
-  zone=app_limit:10m rate=<span class="c-num">10</span>r/s;
-
-<span class="c-kw">server</span> {
-  <span class="c-kw">listen</span> <span class="c-num">443</span> ssl;
-  <span class="c-kw">ssl_certificate</span>     <span class="c-str">/etc/letsencrypt/live/site/cert.pem</span>;
-  <span class="c-kw">ssl_certificate_key</span> <span class="c-str">/etc/letsencrypt/live/site/key.pem</span>;
-
-  <span class="c-cmt"># Dynamic IP blocklist (written by Layer 5)</span>
-  <span class="c-kw">include</span> <span class="c-str">/etc/nginx/blocked_ips.conf</span>;
-  <span class="c-kw">allow</span> all;
-
-  <span class="c-kw">location</span> / {
-    <span class="c-kw">limit_req</span> zone=app_limit burst=<span class="c-num">20</span> nodelay;
-    <span class="c-kw">proxy_pass</span>         <span class="c-str">http://127.0.0.1:5000</span>;
-    <span class="c-kw">proxy_set_header</span>   X-Real-IP <span class="c-var">$remote_addr</span>;
-    <span class="c-kw">proxy_set_header</span>   X-Forwarded-For
-      <span class="c-var">$proxy_add_x_forwarded_for</span>;
-  }
-}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Rate Limit Simulator</div><span class="badge amber">leaky bucket</span></div>
-      <div class="panel-body">
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-          <button class="btn btn-ghost" onclick="nginxSend(1)">Send 1 req</button>
-          <button class="btn btn-ghost" onclick="nginxSend(5)">Send 5 req</button>
-          <button class="btn btn-danger" onclick="nginxSend(30)">Flood 30 req</button>
-          <button class="btn btn-ghost" onclick="nginxReset()">Reset</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-          <div style="font-family:var(--mono);font-size:12px;color:var(--text2)">Bucket fill:</div>
-          <div style="flex:1;background:var(--bg3);border-radius:4px;height:10px;overflow:hidden">
-            <div id="bucket-fill" style="height:100%;border-radius:4px;background:var(--green);width:0%;transition:width .3s"></div>
-          </div>
-          <div class="badge" id="bucket-pct" style="background:var(--bg3);color:var(--text2)">0 / 20</div>
-        </div>
-        <div class="terminal" id="nginx-log" style="max-height:140px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 2 ══════════ -->
-  <div class="page" id="page-layer2">
-    <div class="layer-hero">
-      <div class="layer-num-big">L2</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">Request Logger</div>
-        <div class="layer-desc">Flask @before_request middleware · captures IP, method, path, timestamp, user-agent, payload size · dual-writes to Redis (counters) + SQLite (permanent log)</div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Redis Counters (TTL)</div><span class="badge green">in-memory</span></div>
-        <div class="panel-body" id="redis-panel" style="display:flex;flex-direction:column;gap:8px">
-          <div style="font-family:var(--mono);font-size:12px;color:var(--text3);text-align:center;padding:20px">Waiting for requests...</div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">SQLite Log — request_log</div><span class="badge blue">on-disk</span></div>
-        <div class="panel-body" style="padding:0">
-          <table class="data-table" id="sqlite-table">
-            <thead><tr><th>IP</th><th>Method</th><th>Path</th><th>Size</th><th>Time</th></tr></thead>
-            <tbody id="sqlite-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Flask Middleware Code</div></div>
-      <div class="panel-body" style="padding:0">
-        <div class="code-block" style="border:none;border-radius:0 0 10px 10px">
-<span class="c-kw">from</span> flask <span class="c-kw">import</span> Flask, request
-<span class="c-kw">import</span> time, redis, sqlite3
-
-app = Flask(<span class="c-str">__name__</span>)
-r = redis.<span class="c-fn">Redis</span>()
-
-<span class="c-var">@app.before_request</span>          <span class="c-cmt"># fires for EVERY route automatically</span>
-<span class="c-kw">def</span> <span class="c-fn">log_request</span>():
-    entry = {
-        <span class="c-str">"ip"</span>:        request.remote_addr,
-        <span class="c-str">"method"</span>:    request.method,
-        <span class="c-str">"path"</span>:      request.path,
-        <span class="c-str">"timestamp"</span>: time.<span class="c-fn">time</span>(),
-        <span class="c-str">"user_agent"</span>:request.headers.<span class="c-fn">get</span>(<span class="c-str">"User-Agent"</span>),
-        <span class="c-str">"payload_sz"</span>:request.content_length <span class="c-kw">or</span> <span class="c-num">0</span>
-    }
-    key = <span class="c-fn">f</span><span class="c-str">"rate:{entry['ip']}"</span>
-    r.<span class="c-fn">incr</span>(key)            <span class="c-cmt"># atomic increment</span>
-    r.<span class="c-fn">expire</span>(key, <span class="c-num">60</span>)     <span class="c-cmt"># auto-reset after 60s</span>
-    <span class="c-fn">write_sqlite</span>(entry)   <span class="c-cmt"># permanent record</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 3 ══════════ -->
-  <div class="page" id="page-layer3">
-    <div class="layer-hero">
-      <div class="layer-num-big">L3</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">Threat Detection Engine</div>
-        <div class="layer-desc">Reads Redis counters · applies detection rules · scores threats · triggers block commands when thresholds exceeded</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Detection Rules</div><span class="badge amber" id="rules-firing">0 firing</span></div>
-      <div class="panel-body" style="display:flex;flex-direction:column;gap:8px" id="detection-rules">
-        <div class="rule-card" id="r-rate">
-          <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Rate threshold</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Block if &gt;100 req/min from same IP</div></div>
-          <span class="badge blue">WATCHING</span>
-        </div>
-        <div class="rule-card" id="r-brute">
-          <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Brute force</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Block if &gt;10 POST /login from same IP in 60s</div></div>
-          <span class="badge blue">WATCHING</span>
-        </div>
-        <div class="rule-card" id="r-scan">
-          <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Path scanning</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Block if accessing /admin, /config, /.env, /wp-admin</div></div>
-          <span class="badge blue">WATCHING</span>
-        </div>
-        <div class="rule-card" id="r-ua">
-          <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Bot user-agent</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Suspicious if User-Agent is python-requests, curl, sqlmap</div></div>
-          <span class="badge blue">WATCHING</span>
-        </div>
-        <div class="rule-card" id="r-payload">
-          <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Oversized payload</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Flag if POST body &gt; 50KB (possible injection)</div></div>
-          <span class="badge blue">WATCHING</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Trigger Attack</div></div>
-        <div class="panel-body">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="triggerAttack('rate')">Simulate rate flood (DDoS)</button>
-            <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="triggerAttack('brute')">Simulate brute force login</button>
-            <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="triggerAttack('scan')">Simulate path scanning</button>
-            <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="triggerAttack('bot')">Simulate bot user-agent</button>
-          </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Block command generated</div><span class="badge amber">JSON payload</span></div>
-        <div class="panel-body" style="padding:0">
-          <div class="terminal" id="block-payload" style="border:none;border-radius:0 0 10px 10px">
-<span class="t-dim"># Waiting for threat detection to fire...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 4 ══════════ -->
-  <div class="page" id="page-layer4">
-    <div class="layer-hero">
-      <div class="layer-num-big">L4</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">HMAC-SHA512 Signer</div>
-        <div class="layer-desc">Signs block commands with shared secret · HMAC(key, payload) → 128-char hex digest · ensures tamper-proof command delivery</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Live HMAC Signing Demo</div></div>
-      <div class="panel-body">
-        <div class="grid2" style="margin-bottom:14px">
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">PAYLOAD (edit me)</div>
-            <textarea id="hmac-payload" rows="5" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:var(--mono);font-size:11px;color:var(--text);resize:vertical;outline:none" oninput="recomputeHmac()">{"action":"block","ip":"1.2.3.4","duration":3600,"ts":1712101234}</textarea>
-          </div>
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">SECRET KEY</div>
-            <input type="text" id="hmac-key" value="s3cr3t-256bit-key" oninput="recomputeHmac()" style="margin-bottom:10px">
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">HMAC-SHA512 DIGEST (128 chars)</div>
-            <div id="hmac-output" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:var(--mono);font-size:10px;color:var(--green);word-break:break-all;line-height:1.6;min-height:62px"></div>
-          </div>
-        </div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">Character-by-character digest (first 64 chars)</div>
-        <div id="hmac-chars" class="hmac-chars"></div>
-        <div style="margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--text2)">
-          Try changing a single character in the payload above — watch all 128 characters change completely (avalanche effect).
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Tamper Test</div></div>
-      <div class="panel-body">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-          <button class="btn btn-ghost" onclick="tamperTest('none')">Original command</button>
-          <button class="btn btn-danger" onclick="tamperTest('ip')">Change IP</button>
-          <button class="btn btn-danger" onclick="tamperTest('duration')">Change duration</button>
-          <button class="btn btn-danger" onclick="tamperTest('action')">Change action</button>
-        </div>
-        <div id="tamper-result" style="padding:12px;background:var(--bg3);border-radius:var(--radius);font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.8">Select a tamper test above...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 5 ══════════ -->
-  <div class="page" id="page-layer5">
-    <div class="layer-hero">
-      <div class="layer-num-big">L5</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">Firewall Controller</div>
-        <div class="layer-desc">Receives signed commands · verifies HMAC · checks timestamp freshness · executes iptables rules · auto-unblocks after TTL</div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Send Block Command</div></div>
-        <div class="panel-body">
-          <div style="margin-bottom:10px">
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:5px">Target IP</div>
-            <input type="text" id="fw-ip" value="45.33.12.8">
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:5px">Block duration (seconds): <span id="dur-val">60</span>s</div>
-            <input type="range" id="fw-dur" min="10" max="300" value="60" oninput="document.getElementById('dur-val').textContent=this.value">
-          </div>
-          <div style="margin-bottom:14px">
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:5px">HMAC signature</div>
-            <div style="display:flex;gap:8px">
-              <label style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;cursor:pointer"><input type="radio" name="fw-hmac" value="valid" checked> Valid</label>
-              <label style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;cursor:pointer"><input type="radio" name="fw-hmac" value="invalid"> Tampered</label>
-              <label style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;cursor:pointer"><input type="radio" name="fw-hmac" value="replay"> Replay</label>
-            </div>
-          </div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="sendFwCommand()">Send to firewall controller</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Request pipeline</div></div>
-        <div class="panel-body">
-          <div class="pipeline" id="fw-pipeline">
-            <div class="pipe-step"><div class="pipe-dot" id="p0"></div><div class="pipe-label">Receive</div></div>
-            <div class="pipe-connector" id="pc0"></div>
-            <div class="pipe-step"><div class="pipe-dot" id="p1"></div><div class="pipe-label">HMAC</div></div>
-            <div class="pipe-connector" id="pc1"></div>
-            <div class="pipe-step"><div class="pipe-dot" id="p2"></div><div class="pipe-label">Timestamp</div></div>
-            <div class="pipe-connector" id="pc2"></div>
-            <div class="pipe-step"><div class="pipe-dot" id="p3"></div><div class="pipe-label">IP valid</div></div>
-            <div class="pipe-connector" id="pc3"></div>
-            <div class="pipe-step"><div class="pipe-dot" id="p4"></div><div class="pipe-label">iptables</div></div>
-          </div>
-          <div class="terminal" id="fw-log" style="max-height:220px"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">iptables INPUT chain</div><span class="badge green" id="fw-chain-count">0 rules</span></div>
-      <div class="panel-body" style="padding:0">
-        <table class="data-table">
-          <thead><tr><th>Rule #</th><th>Target</th><th>Source IP</th><th>TTL</th><th>Command</th><th></th></tr></thead>
-          <tbody id="iptables-body">
-            <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:16px">No DROP rules — all traffic ACCEPTED</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: LAYER 6 ══════════ -->
-  <div class="page" id="page-layer6">
-    <div class="layer-hero">
-      <div class="layer-num-big">L6</div>
-      <div>
-        <div style="font-family:var(--sans);font-weight:700;font-size:18px;color:var(--text)">Security Monitor</div>
-        <div class="layer-desc">Real-time traffic analytics · threat timeline · attack pattern visualisation · blocked IP history</div>
-      </div>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">REQUESTS TODAY</div><div class="stat-value blue" id="m-req">0</div></div>
-      <div class="stat-card"><div class="stat-label">ATTACKS BLOCKED</div><div class="stat-value red" id="m-att">0</div></div>
-      <div class="stat-card"><div class="stat-label">UNIQUE IPs</div><div class="stat-value amber" id="m-ips">0</div></div>
-      <div class="stat-card"><div class="stat-label">UPTIME</div><div class="stat-value green" id="m-up">00:00:00</div></div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Request vs Block over time</div></div>
-        <div class="panel-body"><div class="chart-wrap" style="height:180px"><canvas id="monitor-chart"></canvas></div></div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Threat breakdown</div></div>
-        <div class="panel-body"><div class="chart-wrap" style="height:180px"><canvas id="threat-chart"></canvas></div></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Full Security Event Timeline</div></div>
-      <div class="panel-body" style="padding:0">
-        <div class="terminal" id="full-timeline" style="border:none;border-radius:0 0 10px 10px;max-height:300px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: HMAC LAB ══════════ -->
-  <div class="page" id="page-hmac-lab">
-    <div style="font-family:var(--sans);font-weight:700;font-size:20px;margin-bottom:4px">HMAC-SHA512 Lab</div>
-    <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:20px">Explore how changing key or payload affects the signature</div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Avalanche Effect Visualiser</div></div>
-      <div class="panel-body">
-        <div class="grid2">
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:5px">Original payload (A)</div>
-            <textarea id="lab-a" rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:var(--mono);font-size:11px;color:var(--text);resize:none;outline:none" oninput="labUpdate()">{"action":"block","ip":"1.2.3.4","duration":3600}</textarea>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--green);word-break:break-all;margin-top:6px;line-height:1.6" id="lab-digest-a"></div>
-          </div>
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:5px">Modified payload (B) — try changing one char</div>
-            <textarea id="lab-b" rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-family:var(--mono);font-size:11px;color:var(--text);resize:none;outline:none" oninput="labUpdate()">{"action":"block","ip":"1.2.3.5","duration":3600}</textarea>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--amber);word-break:break-all;margin-top:6px;line-height:1.6" id="lab-digest-b"></div>
-          </div>
-        </div>
-        <div style="margin-top:16px">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">Digest comparison — <span id="lab-diff-count">0</span> of 128 characters differ</div>
-          <div id="lab-compare" class="hmac-chars"></div>
-        </div>
-        <div style="margin-top:12px;display:flex;gap:16px">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Changed chars: <span id="lab-pct" style="color:var(--amber)">0%</span></div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Avalanche: <span id="lab-avalanche" style="color:var(--green)">computing...</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header"><div class="panel-title">Attack Scenarios — what fails and why</div></div>
-      <div class="panel-body">
-        <div style="display:flex;flex-direction:column;gap:10px" id="attack-scenarios">
-          <div class="rule-card" style="cursor:pointer" onclick="showScenario(0)">
-            <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">IP changed in transit</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Attacker intercepts and modifies target IP</div></div>
-            <span class="badge red">DETECTED</span>
-          </div>
-          <div class="rule-card" style="cursor:pointer" onclick="showScenario(1)">
-            <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Duration tampered</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Attacker extends block to permanent</div></div>
-            <span class="badge red">DETECTED</span>
-          </div>
-          <div class="rule-card" style="cursor:pointer" onclick="showScenario(2)">
-            <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Forged command (no key)</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Attacker constructs fake signed command</div></div>
-            <span class="badge red">DETECTED</span>
-          </div>
-          <div class="rule-card" style="cursor:pointer" onclick="showScenario(3)">
-            <div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Replay attack</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">Attacker replays a captured valid command</div></div>
-            <span class="badge red">DETECTED</span>
-          </div>
-        </div>
-        <div id="scenario-detail" style="margin-top:14px;padding:14px;background:var(--bg3);border-radius:var(--radius);font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.8;display:none"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ PAGE: ATTACK SIM ══════════ -->
-  <div class="page" id="page-attack-sim">
-    <div style="font-family:var(--sans);font-weight:700;font-size:20px;margin-bottom:4px">Attack Simulator</div>
-    <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:20px">Simulate real attack patterns and watch all 5 layers respond</div>
-
-    <div class="grid3">
-      <div class="panel" style="cursor:pointer;transition:border .15s" onclick="runAttack('ddos')" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor=''">
-        <div class="panel-body" style="text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">⚡</div>
-          <div style="font-family:var(--sans);font-weight:700;font-size:15px;color:var(--red)">DDoS Flood</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:6px">500 requests/sec from one IP</div>
-        </div>
-      </div>
-      <div class="panel" style="cursor:pointer;transition:border .15s" onclick="runAttack('brute')" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor=''">
-        <div class="panel-body" style="text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">🔑</div>
-          <div style="font-family:var(--sans);font-weight:700;font-size:15px;color:var(--amber)">Brute Force Login</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:6px">Repeated POST /login attempts</div>
-        </div>
-      </div>
-      <div class="panel" style="cursor:pointer;transition:border .15s" onclick="runAttack('scan')" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor=''">
-        <div class="panel-body" style="text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">🔍</div>
-          <div style="font-family:var(--sans);font-weight:700;font-size:15px;color:var(--purple)">Port Scan</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:6px">Scanning sensitive endpoints</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Layer Response Pipeline</div><span id="attack-status" class="badge blue">idle</span></div>
-        <div class="panel-body">
-          <div style="display:flex;flex-direction:column;gap:8px" id="layer-response">
-            <div class="rule-card" id="lr1"><div class="rule-icon" style="background:var(--bg3)">L1</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Nginx</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="lr1-status">waiting...</div></div></div>
-            <div class="rule-card" id="lr2"><div class="rule-icon" style="background:var(--bg3)">L2</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Request Logger</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="lr2-status">waiting...</div></div></div>
-            <div class="rule-card" id="lr3"><div class="rule-icon" style="background:var(--bg3)">L3</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Threat Engine</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="lr3-status">waiting...</div></div></div>
-            <div class="rule-card" id="lr4"><div class="rule-icon" style="background:var(--bg3)">L4</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">HMAC Signer</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="lr4-status">waiting...</div></div></div>
-            <div class="rule-card" id="lr5"><div class="rule-icon" style="background:var(--bg3)">L5</div><div><div style="font-family:var(--mono);font-size:12px;color:var(--text)">Firewall</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="lr5-status">waiting...</div></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><div class="panel-title">Attack log</div></div>
-        <div class="panel-body" style="padding:0">
-          <div class="terminal" id="attack-log" style="border:none;border-radius:0 0 10px 10px;max-height:340px"><span class="t-dim"># Select an attack type above to simulate...</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  </div><!-- /content -->
-</main>
-</div><!-- /shell -->
-
-<script src="script.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>
