@@ -30,9 +30,9 @@ async function triggerOtpSend() {
   // ==========================================
   // EMAILJS CONFIGURATION (EMAIL)
   // ==========================================
-  const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
-  const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
-  const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+  const EMAILJS_PUBLIC_KEY = 'GE5wGrt-fiGMKDenh';
+  const EMAILJS_SERVICE_ID = 'service_lq62ely';
+  const EMAILJS_TEMPLATE_ID = 'template_76krdeh';
 
   let success = true;
 
