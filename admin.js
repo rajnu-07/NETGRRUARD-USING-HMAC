@@ -24,9 +24,8 @@ async function triggerOtpSend() {
   // ==========================================
   // TWILIO CONFIGURATION (SMS)
   // ==========================================
-  const TWILIO_ACCOUNT_SID = 'YOUR_TWILIO_SID';
-  const TWILIO_AUTH_TOKEN = 'YOUR_TWILIO_AUTH_TOKEN';
-  const TWILIO_PHONE_NUMBER = '+19783964758'; // e.g., +1234567890
+  // Twilio credentials are now securely managed in Vercel Environment Variables.
+  // The frontend no longer stores or sends them directly.
 
   // ==========================================
   // EMAILJS CONFIGURATION (EMAIL)
@@ -37,37 +36,28 @@ async function triggerOtpSend() {
 
   let success = true;
 
-  // 1. Send SMS using Twilio (routed through a CORS proxy to bypass browser restrictions)
-  if (TWILIO_ACCOUNT_SID !== 'YOUR_TWILIO_SID') {
-    try {
-      const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
-      const body = new URLSearchParams({
-        To: phone,
-        From: TWILIO_PHONE_NUMBER,
-        Body: `Your NetGuard Admin SMS OTP is: ${generatedSmsOTP}`
-      });
-
-      const response = await fetch(`https://cors-anywhere.herokuapp.com/https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${auth}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: body
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Unknown Twilio Error');
-      }
-      console.log(`Successfully sent SMS to ${phone}`);
-    } catch (smsError) {
-      console.error("Twilio SMS failed:", smsError);
-      console.log(`[FALLBACK LOG] SMS OTP to ${phone}: ${generatedSmsOTP}`);
-      success = false;
+  // 1. Send SMS using Vercel Serverless Function
+  try {
+    const response = await fetch('/api/send-sms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        phone: phone,
+        otp: generatedSmsOTP
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Server error');
     }
-  } else {
-    console.log(`[MOCK SMS] Configure Twilio keys to send real SMS. OTP: ${generatedSmsOTP}`);
+    console.log(`Successfully sent SMS to ${phone}`);
+  } catch (smsError) {
+    console.error("Twilio SMS failed via Vercel:", smsError);
+    console.log(`[FALLBACK LOG] SMS OTP to ${phone}: ${generatedSmsOTP}`);
+    success = false;
   }
 
   // 2. Send Email using EmailJS
