@@ -82,7 +82,8 @@
   letter-spacing: 0.5px;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
   background: var(--bg3);
   border: 1px solid var(--border2);
   border-radius: 6px;
@@ -94,7 +95,8 @@
   outline: none;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
   border-color: var(--blue);
   background: var(--bg2);
   box-shadow: 0 0 0 3px rgba(30, 100, 255, 0.15);

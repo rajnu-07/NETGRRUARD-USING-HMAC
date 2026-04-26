@@ -45,7 +45,16 @@
       </div>
       <div class="input-group">
         <label for="admin-phone">Phone Number</label>
-        <input type="tel" id="admin-phone" placeholder="Include country code (+123...)" required>
+        <div style="display: flex; gap: 8px;">
+          <select id="country-code" style="width: 110px; padding-right: 8px;">
+            <option value="+91">IN (+91)</option>
+            <option value="+1">US (+1)</option>
+            <option value="+44">UK (+44)</option>
+            <option value="+61">AU (+61)</option>
+            <option value="+81">JP (+81)</option>
+          </select>
+          <input type="tel" id="admin-phone" placeholder="Phone number" style="flex: 1;" required>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary login-btn" id="btn-auth">
         <span>Authenticate</span>

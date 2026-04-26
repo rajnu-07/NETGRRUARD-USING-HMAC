@@ -15,7 +15,14 @@ const otpAlert = document.getElementById('otp-alert');
 
 async function triggerOtpSend() {
   const email = document.getElementById('admin-email').value;
-  const phone = document.getElementById('admin-phone').value;
+  const rawPhone = document.getElementById('admin-phone').value;
+  const countryCode = document.getElementById('country-code').value;
+  
+  // If user typed the country code manually in the input, avoid duplicating it
+  let phone = rawPhone;
+  if (!phone.startsWith('+')) {
+    phone = countryCode + phone;
+  }
 
   // Generate 6-digit OTPs
   generatedEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
