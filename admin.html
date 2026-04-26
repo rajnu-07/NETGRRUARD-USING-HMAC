@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetGuard — Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body class="login-body">
+
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="brand" style="justify-content: center; margin-bottom: 24px;">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="brand-name">NetGuard</div>
+    </div>
+    
+    <div class="login-header">
+      <h2 id="form-title">Admin Access</h2>
+      <p id="form-subtitle" class="layer-desc">Secure gateway to network controls</p>
+    </div>
+
+    <!-- Step 1: Credentials Form -->
+    <form id="step-1-form" class="login-form">
+      <div class="input-group">
+        <label for="admin-user">Username</label>
+        <input type="text" id="admin-user" placeholder="Enter admin username" required>
+      </div>
+      <div class="input-group">
+        <label for="admin-pass">Password</label>
+        <input type="password" id="admin-pass" placeholder="Enter admin password" required>
+      </div>
+      <!-- Inputs for targets -->
+      <div class="input-group">
+        <label for="admin-email">Recovery Email</label>
+        <input type="email" id="admin-email" placeholder="Email to receive OTP" required>
+      </div>
+      <div class="input-group">
+        <label for="admin-phone">Phone Number</label>
+        <input type="tel" id="admin-phone" placeholder="Include country code (+123...)" required>
+      </div>
+      <button type="submit" class="btn btn-primary login-btn" id="btn-auth">
+        <span>Authenticate</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <div id="login-error" class="error-text"></div>
+    </form>
+
+    <!-- Step 2: OTP Form -->
+    <form id="step-2-form" class="login-form" style="display: none;">
+      <div class="alert-box" id="otp-alert">
+        OTP sent! Check your Email and Phone.
+      </div>
+      <div class="input-group">
+        <label for="email-otp">Email OTP</label>
+        <input type="text" id="email-otp" placeholder="Enter 6-digit Email OTP" maxlength="6" required>
+      </div>
+      <div class="input-group">
+        <label for="sms-otp">SMS OTP</label>
+        <input type="text" id="sms-otp" placeholder="Enter 6-digit SMS OTP" maxlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary login-btn" id="btn-verify">
+        <span>Verify & Login</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </button>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button type="button" class="btn btn-ghost login-btn" style="flex: 1; justify-content: center;" onclick="resendOtps()">
+          <span>Resend OTPs</span>
+        </button>
+        <button type="button" class="btn btn-ghost login-btn" style="flex: 1; justify-content: center;" onclick="resetForm()">
+          <span>Back</span>
+        </button>
+      </div>
+      <div id="otp-error" class="error-text"></div>
+    </form>
+
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
