@@ -1,6 +1,4 @@
-// ══════════════════════════════════════════════════
-// GLOBAL STATE
-// ══════════════════════════════════════════════════
+﻿// GLOBAL STATE
 const state = {
   totalReqs: 0, blockedIPs: {}, threats: 0, hmacFails: 0,
   requestLog: [], securityLog: [], timeline: [],
@@ -20,9 +18,7 @@ const scenarios = [
   {t:'Replay attack',d:'Attacker captures a real valid command (HMAC passes!). They replay it 2 minutes later. Timestamp check fires: command_age=120s > 30s limit → 400 stale.',why:'Timestamp is included inside the signed payload, so it cannot be changed. Old commands auto-expire.'}
 ];
 
-// ══════════════════════════════════════════════════
 // NAVIGATION
-// ══════════════════════════════════════════════════
 const pageTitles = {
   overview:'Dashboard Overview', layer1:'Layer 1 — Nginx Web Server',
   layer2:'Layer 2 — Request Logger', layer3:'Layer 3 — Threat Detection',
@@ -41,17 +37,13 @@ function nav(id, el) {
   if (id === 'layer4') { recomputeHmac(); }
 }
 
-// ══════════════════════════════════════════════════
 // CLOCK
-// ══════════════════════════════════════════════════
 function updateClock() {
   document.getElementById('clock').textContent = new Date().toLocaleTimeString();
 }
 setInterval(updateClock, 1000); updateClock();
 
-// ══════════════════════════════════════════════════
 // SIMULATED HMAC (visual only — uses deterministic fake)
-// ══════════════════════════════════════════════════
 function simpleHash(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
@@ -72,9 +64,7 @@ function fakeHmac(key, payload) {
   return result;
 }
 
-// ══════════════════════════════════════════════════
 // CHARTS
-// ══════════════════════════════════════════════════
 const trafficData = { labels: [], req: [], blocked: [] };
 for (let i = 0; i < 20; i++) { trafficData.labels.push(''); trafficData.req.push(0); trafficData.blocked.push(0); }
 
@@ -111,9 +101,7 @@ const threatChart = new Chart(document.getElementById('threat-chart'), {
   options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 }, boxWidth: 10 } } }, animation: false }
 });
 
-// ══════════════════════════════════════════════════
 // LIVE SIMULATION
-// ══════════════════════════════════════════════════
 let tickCount = 0;
 
 function addLog(elId, line, cls='') {
@@ -194,9 +182,7 @@ function simulate() {
 
 setInterval(simulate, 700);
 
-// ══════════════════════════════════════════════════
 // BLOCK / UNBLOCK
-// ══════════════════════════════════════════════════
 const blockTimers = {};
 
 function blockIP(ip, reason, duration) {
@@ -238,9 +224,7 @@ function clearAllBlocks() {
   });
 }
 
-// ══════════════════════════════════════════════════
 // UI UPDATERS
-// ══════════════════════════════════════════════════
 function updateFirewallTable() {
   const tbody = document.getElementById('firewall-table');
   const blocks = Object.entries(state.blockedIPs);
@@ -358,9 +342,7 @@ function addSecurityEvent(ip, reason) {
   addLog('full-timeline', `<span class="t-amber">${ts()} THREAT  ${ip.padEnd(15)} ${reason}</span>`);
 }
 
-// ══════════════════════════════════════════════════
 // NGINX SIMULATOR
-// ══════════════════════════════════════════════════
 let bucket = 0;
 function nginxSend(n) {
   const el = document.getElementById('nginx-log');
@@ -395,9 +377,7 @@ function nginxReset() {
   if (el) { el.innerHTML = '<span class="t-dim"># Bucket reset to 0</span>'; }
 }
 
-// ══════════════════════════════════════════════════
 // THREAT DETECTION
-// ══════════════════════════════════════════════════
 function triggerAttack(type) {
   const ip = '99.88.77.66';
   const rules = { rate: 'r-rate', brute: 'r-brute', scan: 'r-scan', bot: 'r-ua' };
@@ -428,9 +408,7 @@ function triggerAttack(type) {
   setTimeout(() => { document.getElementById('rules-firing').textContent = '0 firing'; blockIP(ip, type + ' attack', 60); }, 1500);
 }
 
-// ══════════════════════════════════════════════════
 // HMAC LAYER 4
-// ══════════════════════════════════════════════════
 function recomputeHmac() {
   const payload = document.getElementById('hmac-payload').value;
   const key = document.getElementById('hmac-key').value;
@@ -472,9 +450,7 @@ function tamperTest(type) {
   }
 }
 
-// ══════════════════════════════════════════════════
 // FIREWALL CONTROLLER
-// ══════════════════════════════════════════════════
 function resetPipeline() {
   for (let i = 0; i < 5; i++) {
     const d = document.getElementById('p'+i);
@@ -556,9 +532,7 @@ function sendFwCommand() {
   });
 }
 
-// ══════════════════════════════════════════════════
 // HMAC LAB
-// ══════════════════════════════════════════════════
 function labUpdate() {
   const a = document.getElementById('lab-a').value;
   const b = document.getElementById('lab-b').value;
@@ -591,9 +565,7 @@ ${s.d}
 <span class="t-green">${s.why}</span>`;
 }
 
-// ══════════════════════════════════════════════════
 // ATTACK SIMULATOR
-// ══════════════════════════════════════════════════
 const attackConfigs = {
   ddos: {
     name: 'DDoS Flood', ip: '55.66.77.88',
@@ -690,9 +662,7 @@ function runAttack(type) {
   }, 2800);
 }
 
-// ══════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════
 window.addEventListener('load', () => {
   labUpdate();
   recomputeHmac();
